@@ -11,8 +11,9 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, HttpUrl
+from typing import Optional, List
+from datetime import datetime
 
 # Example schemas (replace with your own):
 
@@ -37,6 +38,34 @@ class Product(BaseModel):
     price: float = Field(..., ge=0, description="Price in dollars")
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
+
+# MarketView AI schemas
+
+class NewsArticle(BaseModel):
+    """
+    Processed news article ready for display
+    Collection name: "newsarticle" -> we will explicitly use "news" as collection
+    """
+    url: Optional[HttpUrl] = Field(None, description="Original article URL")
+    source: str = Field(..., description="Publisher or source, e.g., Bloomberg")
+    title_en: Optional[str] = Field(None, description="Original English title")
+    title_ko: str = Field(..., description="Korean title")
+    summary_ko: str = Field(..., description="Three-line Korean summary")
+    sentiment: str = Field(..., description="bullish | bearish | neutral")
+    published_at: Optional[datetime] = Field(None, description="Original publish time (UTC)")
+    tags: Optional[List[str]] = Field(default_factory=list, description="Topic tags")
+    ticker: Optional[str] = Field(None, description="Primary related ticker symbol if any")
+
+class RawArticle(BaseModel):
+    """
+    Raw input payload for ingestion
+    """
+    url: Optional[HttpUrl] = None
+    source: str
+    title: str
+    content: Optional[str] = None
+    published_at: Optional[datetime] = None
+    ticker: Optional[str] = None
 
 # Add your own schemas here:
 # --------------------------------------------------
